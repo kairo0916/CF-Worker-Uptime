@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">{{ config.settings?.title || 'System Status' }}</h1>
+            <p class="text-gray-600 mt-2" v-if="lastUpdated">Last updated: {{ lastUpdated }}</p>
+        </header>
+
+        <div v-if="loading" class="text-center text-gray-500">Loading status...</div>
+        <div v-else-if="error" class="text-center text-red-500">{{ error }}</div>
+
+        <div v-else class="space-y-8">
+            <div v-for="group in statusData" :key="group.id" class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-700">{{ group.name }}</h2>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    <div v-for="monitor in group.monitors" :key="monitor.id" class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-4">
+                                <div :class="getStatusColor(monitor.state.status)" class="w-4 h-4 rounded-full"></div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        <a v-if="monitor.display.public_link" :href="monitor.url" target="_blank" class="hover:underline">{{ monitor.name }}</a>
+                                        <span v-else>{{ monitor.name }}</span>
+                                    </h3>
+                                    <div class="text-sm text-gray-500 space-x-2">
+                                        <span v-for="tag in monitor.tags" :key="tag" class="bg-gray-100 px-2 py-0.5 rounded text-xs">{{ tag }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-bold" :class="getStatusTextColor(monitor.state.status)">
+                                    {{ monitor.state.status }}
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {{ monitor.state.last_latency }}ms
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Section -->
+                        <div v-if="monitor.display.chart && monitor.display.history !== false" class="mt-4">
+                            <button @click="toggleChart(monitor)" class="text-xs text-blue-500 hover:underline focus:outline-none">
+                                {{ monitor.showChart ? 'Hide Latency Chart' : 'Show Latency Chart' }}
+                            </button>
+                            <div v-if="monitor.showChart" class="mt-2 h-40">
+                                <canvas :id="'chart-' + monitor.id"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION: API_URL can be empty if served from the same worker
+        const API_URL = ''; 
+
+        const { createApp, ref, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const config = ref({});
+                const statusData = ref([]);
+                const loading = ref(true);
+                const error = ref(null);
+                const lastUpdated = ref('');
+                const charts = {}; // Store chart instances
+
+                const getStatusColor = (status) => {
+                    switch (status) {
+                        case 'UP': return 'bg-green-500';
+                        case 'DEGRADED': return 'bg-yellow-500';
+                        case 'DOWN': return 'bg-red-500';
+                        default: return 'bg-gray-300';
+                    }
+                };
+
+                const getStatusTextColor = (status) => {
+                    switch (status) {
+                        case 'UP': return 'text-green-600';
+                        case 'DEGRADED': return 'text-yellow-600';
+                        case 'DOWN': return 'text-red-600';
+                        default: return 'text-gray-500';
+                    }
+                };
+
+                const fetchData = async () => {
+                    try {
+                        loading.value = true;
+                        const baseUrl = window.location.protocol === 'file:' ? API_URL : (API_URL || '');
+                        
+                        const [configRes, statusRes] = await Promise.all([
+                            fetch(`${baseUrl}/api/config`),
+                            fetch(`${baseUrl}/api/status`)
+                        ]);
+
+                        if (!configRes.ok) {
+                            throw new Error(`Config API Error: ${configRes.status} ${configRes.statusText}`);
+                        }
+                        if (!statusRes.ok) {
+                            const errText = await statusRes.text();
+                            throw new Error(`Status API Error: ${statusRes.status} ${statusRes.statusText} - ${errText}`);
+                        }
+
+                        config.value = await configRes.json();
+                        const rawStatus = await statusRes.json();
+                        
+                        // Merge with existing data to preserve chart state if possible, or just reset
+                        // For simplicity, we just reload data but keep showChart flag if we match IDs
+                        // Actually, mapping to new array might lose 'showChart' property if we are not careful.
+                        // We need to initialize 'showChart' property.
+                        
+                        statusData.value = rawStatus.map(group => ({
+                            ...group,
+                            monitors: group.monitors.map(m => ({
+                                ...m,
+                                showChart: false 
+                            }))
+                        }));
+                        
+                        lastUpdated.value = new Date().toLocaleString();
+                    } catch (e) {
+                        error.value = e.message + '. Please check API_URL configuration.';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const toggleChart = async (monitor) => {
+                    monitor.showChart = !monitor.showChart;
+                    if (monitor.showChart) {
+                        await nextTick(); // Wait for canvas to render
+                        loadChart(monitor);
+                    } else {
+                        // Destroy chart instance
+                        if (charts[monitor.id]) {
+                            charts[monitor.id].destroy();
+                            delete charts[monitor.id];
+                        }
+                    }
+                };
+
+                const loadChart = async (monitor) => {
+                    const baseUrl = window.location.protocol === 'file:' ? API_URL : (API_URL || '');
+                    try {
+                        const res = await fetch(`${baseUrl}/api/history/${monitor.id}`);
+                        const history = await res.json();
+                        
+                        const ctx = document.getElementById('chart-' + monitor.id);
+                        if (!ctx) return;
+
+                        if (charts[monitor.id]) charts[monitor.id].destroy();
+
+                        charts[monitor.id] = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: history.map(h => new Date(h.timestamp).toLocaleTimeString()),
+                                datasets: [{
+                                    label: 'Latency (ms)',
+                                    data: history.map(h => h.latency),
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+
+                    } catch (e) {
+                        console.error('Failed to load history', e);
+                    }
+                };
+
+                onMounted(() => {
+                    fetchData();
+                    setInterval(fetchData, 60000);
+                });
+
+                return {
+                    config,
+                    statusData,
+                    loading,
+                    error,
+                    lastUpdated,
+                    getStatusColor,
+                    getStatusTextColor,
+                    toggleChart
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+name = "uptime-monitor"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+node_compat = true
+
+# Cron Trigger - Runs every minute
+[triggers]
+crons = ["* * * * *"]
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "uptime-db"
+database_id = "8cc4d5f1-fc03-43e9-a2f2-0047fd668e49"
+
+# Rules to allow importing YAML and HTML as text
+[[rules]]
+type = "Text"
+globs = ["**/*.yaml", "**/*.html"]
+fallthrough = true
+
+[vars]
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
+persist = true
+head_sampling_rate = 1
