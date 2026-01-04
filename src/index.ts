@@ -36,6 +36,7 @@ app.get('/api/config', (c) => {
       // hide callback_url/secret
     },
     groups: config.groups,
+    incidents: config.incidents,
   };
   return c.json(safeConfig);
 });

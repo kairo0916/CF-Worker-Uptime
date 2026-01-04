@@ -50,6 +50,24 @@ export const TagDefinitionSchema = z.object({
   color: z.string().optional(),
 });
 
+export const IncidentUpdateSchema = z.object({
+  timestamp: z.string(),
+  message: z.string(),
+  status: z.string().optional(),
+});
+
+export const IncidentSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  type: z.enum(['scheduled', 'routine', 'incident']),
+  status: z.enum(['upcoming', 'in_progress', 'completed', 'investigating', 'identified', 'monitoring', 'resolved']),
+  affected_monitors: z.array(z.string()).optional(),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  routine_schedule: z.string().optional(), // For routine maintenance description
+  updates: z.array(IncidentUpdateSchema).optional().default([]),
+});
+
 export const ConfigSchema = z.object({
   settings: z.object({
     title: z.string(),
@@ -59,7 +77,9 @@ export const ConfigSchema = z.object({
     notification_on_down_only: z.boolean().default(false),
     tags: z.array(TagDefinitionSchema).optional(), // Predefined tags
   }),
+  monitors: z.array(MonitorSchema).optional(), // Support flat structure if needed, but we use groups
   groups: z.array(GroupSchema),
+  incidents: z.array(IncidentSchema).optional().default([]),
 });
 
 export type Monitor = z.infer<typeof MonitorSchema>;
