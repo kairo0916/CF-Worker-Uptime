@@ -8,6 +8,37 @@ settings:
   # If true, only send notifications when status changes to DOWN.
   # DEGRADED or UP (recovery) events will NOT trigger notifications.
   notification_on_down_only: true 
+  tags:
+    - id: "zeabur"
+      label: "Zeabur"
+      color: "#6300FF"
+    - id: "eopf"
+      label: "EdgeOne Page Function"
+      color: "#2563EB"
+    - id: "eopage"
+      label: "EdgeOne Page"
+      color: "#2563EB"
+    - id: "eo"
+      label: "EdgeOne CDN"
+      color: "#2563EB"
+    - id: "cf"
+      label: "Cloudflare CDN"
+      color: "#D97706"
+    - id: "cfw"
+      label: "Cloudflare Worker"
+      color: "#D97706"
+    - id: "cfp"
+      label: "Cloudflare Page"
+      color: "#D97706"
+    - id: "vercel"
+      label: "Vercel Page"
+      color: "#000000"
+    - id: "vf"
+      label: "Vercel Function"
+      color: "#000000"
+    - id: "self"
+      label: "Self-Hosted"
+      color: "#4B5563"
 
 groups:
   - id: "My Service"
@@ -15,9 +46,7 @@ groups:
     monitors:
       - id: "uptimekuma"
         name: "UptimeKuma"
-        tags: 
-          - name: "Zeabur"
-            color: "#6300FF"
+        tags: [zeabur]
         type: "http"
         url: "https://acofork-uptime.zeabur.app/status/acofork"
         method: "HEAD"
@@ -30,22 +59,9 @@ groups:
         validation:
           status: 200
 
-      - id: "blog"
-        name: "博客总入口（自动分流）"
-        type: "http"
-        url: "https://blog.acofork.com/"
-        method: "HEAD"
-        timeout: 10000
-        expected_latency: 1000
-        grace_period: 3
-        display:
-          chart: true
-          public_link: true
-        validation:
-          status: 200
-
       - id: "blog_eo"
-        name: "博客（EdgeOne Pages国内节点）"
+        name: "Blog CN"
+        tags: [eopage]
         type: "http"
         url: "https://eo-blog.acofork.com/"
         method: "HEAD"
@@ -60,6 +76,7 @@ groups:
 
       - id: "blog_cf"
         name: "博客（Cloudflare Pages海外节点）"
+        tags: [cfp]
         type: "http"
         url: "https://cf-blog.acofork.com/"
         method: "HEAD"
@@ -74,6 +91,7 @@ groups:
 
       - id: "umami_nas"
         name: "Umami（NAS）"
+        tags: [eo,self]
         type: "http"
         url: "https://umami.acofork.com/"
         method: "HEAD"
@@ -88,6 +106,7 @@ groups:
 
       - id: "vw_nas"
         name: "VaultWarden（NAS）"
+        tags: [eo,self]
         type: "http"
         url: "https://vw.acofork.com/"
         method: "HEAD"
@@ -102,6 +121,7 @@ groups:
 
       - id: "pan_nas"
         name: "OpenList（NAS）"
+        tags: [eo,self]
         type: "http"
         url: "https://pan.acofork.com/"
         method: "GET"
@@ -116,6 +136,7 @@ groups:
 
       - id: "fnos_nas"
         name: "飞牛（NAS）"
+        tags: [eo,self]
         type: "http"
         url: "https://nas.acofork.com/"
         method: "HEAD"
@@ -130,6 +151,7 @@ groups:
 
       - id: "gh_proxy_eo"
         name: "Github 代理（EdgeOne）"
+        tags: [eopf]
         type: "http"
         url: "https://gh.072103.xyz/"
         method: "HEAD"
@@ -144,6 +166,7 @@ groups:
 
       - id: "gh_proxy_cf"
         name: "Github 代理（Cloudflare）"
+        tags: [cfw]
         type: "http"
         url: "https://cf-gh.072103.xyz/"
         method: "HEAD"
@@ -158,6 +181,7 @@ groups:
 
       - id: "eopfapi"
         name: "随机图API（EdgeOne）"
+        tags: [eopf]
         type: "http"
         url: "https://eopfapi.acofork.com/pic/"
         method: "HEAD"
@@ -172,6 +196,7 @@ groups:
 
       - id: "eo_umami"
         name: "Umami（EdgeOne Pages）"
+        tags: [eopf]
         type: "http"
         url: "https://eo-umami.acofork.com/"
         method: "HEAD"
@@ -186,6 +211,7 @@ groups:
 
       - id: "upload_to_s3"
         name: "简单上传文件到S3（EdgeOne Pages）"
+        tags: [eopf]
         type: "http"
         url: "https://u.2x.nz/"
         method: "GET"
@@ -200,6 +226,7 @@ groups:
 
       - id: "onedrive_index"
         name: "OneDrive 公开只读（Vercel）"
+        tags: [vf]
         type: "http"
         url: "https://e3.2x.nz/"
         method: "HEAD"
@@ -214,6 +241,7 @@ groups:
 
       - id: "eo_http"
         name: "网站安全测试（EdgeOne Pages）"
+        tags: [eopf]
         type: "http"
         url: "https://http.acofork.com/"
         method: "HEAD"
@@ -228,6 +256,7 @@ groups:
 
       - id: "yxvm_ssh"
         name: "YxVM SSH"
+        tags: [self]
         type: "tcp"
         url: "46.232.60.28:22"
         timeout: 5000

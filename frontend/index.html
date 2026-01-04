@@ -35,8 +35,8 @@
                                     <span v-if="monitor.tags" class="ml-2 inline-flex space-x-1">
                                         <span v-for="tag in monitor.tags" :key="typeof tag === 'string' ? tag : tag.name"
                                             class="px-2 py-0.5 rounded text-[0.7em] text-white font-bold"
-                                            :style="{ backgroundColor: (typeof tag === 'object' && tag.color) ? tag.color : '#6b7280' }">
-                                            {{ typeof tag === 'string' ? tag : tag.name }}
+                                            :style="getTagStyle(tag)">
+                                            {{ getTagLabel(tag) }}
                                         </span>
                                     </span>
                                 </div>
@@ -107,6 +107,39 @@
                     }
                 };
 
+                const getTagStyle = (tagInput) => {
+                    // 1. If it's an object with explicit color, use it
+                    if (typeof tagInput === 'object' && tagInput.color) {
+                        return { backgroundColor: tagInput.color };
+                    }
+                    
+                    // 2. If it's a string, check predefined tags
+                    const tagName = typeof tagInput === 'string' ? tagInput : tagInput.name;
+                    
+                    // Look up in config.settings.tags
+                    if (config.value.settings?.tags) {
+                        const predefined = config.value.settings.tags.find(t => t.id === tagName);
+                        if (predefined && predefined.color) {
+                            return { backgroundColor: predefined.color };
+                        }
+                    }
+
+                    // 3. Fallback
+                    return { backgroundColor: '#6b7280' };
+                };
+
+                const getTagLabel = (tagInput) => {
+                     const tagName = typeof tagInput === 'string' ? tagInput : tagInput.name;
+                     // Look up label in predefined tags
+                     if (config.value.settings?.tags) {
+                        const predefined = config.value.settings.tags.find(t => t.id === tagName);
+                        if (predefined && predefined.label) {
+                            return predefined.label;
+                        }
+                    }
+                    return tagName;
+                };
+
                 const fetchData = async () => {
                     try {
                         loading.value = true;
@@ -134,13 +167,16 @@
 
                         // Update favicon
                         if (config.value.settings?.logo) {
-                            let link = document.querySelector("link[rel~='icon']");
-                            if (!link) {
-                                link = document.createElement('link');
-                                link.rel = 'icon';
-                                document.head.appendChild(link);
-                            }
+                            // Remove existing favicon links
+                            const existingLinks = document.querySelectorAll("link[rel*='icon']");
+                            existingLinks.forEach(l => l.remove());
+
+                            // Create new favicon link
+                            const link = document.createElement('link');
+                            link.type = 'image/x-icon';
+                            link.rel = 'shortcut icon';
                             link.href = config.value.settings.logo;
+                            document.getElementsByTagName('head')[0].appendChild(link);
                         }
 
                         const rawStatus = await statusRes.json();
@@ -230,7 +266,9 @@
                     lastUpdated,
                     getStatusColor,
                     getStatusTextColor,
-                    toggleChart
+                    toggleChart,
+                    getTagStyle,
+                    getTagLabel
                 };
             }
         }).mount('#app');

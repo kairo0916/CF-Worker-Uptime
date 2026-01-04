@@ -44,6 +44,12 @@ export const GroupSchema = z.object({
   monitors: z.array(MonitorSchema),
 });
 
+export const TagDefinitionSchema = z.object({
+  id: z.string(),
+  label: z.string(), // Display name
+  color: z.string().optional(),
+});
+
 export const ConfigSchema = z.object({
   settings: z.object({
     title: z.string(),
@@ -51,6 +57,7 @@ export const ConfigSchema = z.object({
     callback_url: z.string().optional(),
     callback_secret: z.string().optional(),
     notification_on_down_only: z.boolean().default(false),
+    tags: z.array(TagDefinitionSchema).optional(), // Predefined tags
   }),
   groups: z.array(GroupSchema),
 });
