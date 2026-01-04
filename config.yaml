@@ -41,7 +41,7 @@ settings:
       label: "Self-Hosted"
       color: "#4B5563"
 
-incidents:
+# incidents:
 #   - id: "maintenance-001"
 #     title: "Database Migration"
 #     type: "scheduled" # scheduled, routine, incident
@@ -88,7 +88,7 @@ groups:
         type: "http"
         url: "https://acofork-uptime.zeabur.app/status/acofork"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -103,7 +103,7 @@ groups:
         type: "http"
         url: "https://eo-blog.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -118,7 +118,7 @@ groups:
         type: "http"
         url: "https://cf-blog.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -133,7 +133,7 @@ groups:
         type: "http"
         url: "https://umami.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -148,7 +148,7 @@ groups:
         type: "http"
         url: "https://vw.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -163,7 +163,7 @@ groups:
         type: "http"
         url: "https://pan.acofork.com/"
         method: "GET"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -178,7 +178,7 @@ groups:
         type: "http"
         url: "https://nas.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -193,7 +193,7 @@ groups:
         type: "http"
         url: "https://gh.072103.xyz/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -208,7 +208,7 @@ groups:
         type: "http"
         url: "https://cf-gh.072103.xyz/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -223,7 +223,7 @@ groups:
         type: "http"
         url: "https://v-gh.072103.xyz/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -238,7 +238,7 @@ groups:
         type: "http"
         url: "https://eopfapi.acofork.com/pic/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -253,7 +253,7 @@ groups:
         type: "http"
         url: "https://eo-umami.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -268,7 +268,7 @@ groups:
         type: "http"
         url: "https://u.2x.nz/"
         method: "GET"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -283,7 +283,7 @@ groups:
         type: "http"
         url: "https://e3.2x.nz/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -298,7 +298,7 @@ groups:
         type: "http"
         url: "https://http.acofork.com/"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -312,7 +312,7 @@ groups:
         tags: [self]
         type: "tcp"
         url: "46.232.60.28:22"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 1000
         grace_period: 3
         display:
@@ -327,7 +327,7 @@ groups:
         type: "http"
         url: "https://www.google.com"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 2000
         grace_period: 3
         display:
@@ -341,7 +341,7 @@ groups:
         type: "http"
         url: "https://www.cloudflare.com"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 2000
         grace_period: 3
         display:
@@ -355,7 +355,7 @@ groups:
         type: "http"
         url: "https://github.com"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 2000
         grace_period: 3
         display:
@@ -369,7 +369,7 @@ groups:
         type: "http"
         url: "https://www.bing.com"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 2000
         grace_period: 3
         display:
@@ -383,7 +383,7 @@ groups:
         type: "http"
         url: "https://www.baidu.com"
         method: "HEAD"
-        timeout: 20000
+        timeout: 60000
         expected_latency: 3000
         grace_period: 3
         display:
